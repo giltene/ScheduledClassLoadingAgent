@@ -82,6 +82,23 @@ import java.util.*;
  * </code>
  * </pre>
  *
+ *
+ * Some useful diagnostics properties:
+ *
+ * <ul>
+ * <li>
+ * The agent can be set to a verbose output mode (including periodic reporting on observed class loaders) by setting the property: <br>
+ * {@code -Dorg.giltene.scheduledclassloadingagent.verbose=true}
+ * </li>
+ * <li>
+ * The frequency with which the agent reports on observed loaders can be set with the property:<br>
+ * {@code -Dorg.giltene.scheduledclassloadingagent.verboseReportingPeriod=<periodInMillis>}
+ * </li>
+ * <li>
+ * To periodically report on observed classes that include a given string, set the property:<br>
+ * {@code -Dorg.giltene.scheduledclassloadingagent.reportClassNamesThatInclude=<string>}
+ * </li>
+ *  </ul>
  */
 
 public class ScheduledClassLoadingAgent {
