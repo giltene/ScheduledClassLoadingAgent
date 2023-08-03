@@ -55,7 +55,7 @@ import java.util.*;
  *
  *     <li>"#" will be generally ignored as a comment,, EXCEPT when "#delay={@literal <delayInMillis>}" is found.</li>
  *
- *     <li>When a #delay line is enountered, the expectation is  that the agent will wait for the specified
+ *     <li>When a #delay line is encountered, the expectation is  that the agent will wait for the specified
  *     number of milliseconds, before acting on the rest of the input.</li>
  *
  *     <li>Each non-empty, non-# line will include two strings: the first (className) being the fully qualified class
