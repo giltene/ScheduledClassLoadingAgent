@@ -183,26 +183,9 @@ public class ScheduledClassLoadingAgent {
     }
 
     static class AgentLoaderThread extends Thread {
-        static class ClassToLoadEntry {
-            private final String className;
-            private final String classLoaderClassName;
-
-            ClassToLoadEntry(String className, String classLoaderClassName) {
-                this.className = className;
-                this.classLoaderClassName = classLoaderClassName;
-            }
-
-            public String getClassName() {
-                return className;
-            }
-
-            public String getClassLoaderClassName() {
-                return classLoaderClassName;
-            }
-        }
-        List<Object> workList = new ArrayList<>();
-
+        final List<Object> workList = new ArrayList<>();
         final Instrumentation instrumentation;
+
         AgentLoaderThread(String args, Instrumentation instrumentation) {
             this.instrumentation = instrumentation;
             if (args != null) {
@@ -295,6 +278,24 @@ public class ScheduledClassLoadingAgent {
                 }
             } catch (InterruptedException ex) {
                 // do nothing on interruption,
+            }
+        }
+
+        static class ClassToLoadEntry {
+            private final String className;
+            private final String classLoaderClassName;
+
+            ClassToLoadEntry(String className, String classLoaderClassName) {
+                this.className = className;
+                this.classLoaderClassName = classLoaderClassName;
+            }
+
+            public String getClassName() {
+                return className;
+            }
+
+            public String getClassLoaderClassName() {
+                return classLoaderClassName;
             }
         }
     }
