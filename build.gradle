@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'org.giltene.scheduledclassloadingagent'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+jar {
+    archiveBaseName = 'ScheduledClassLoadingAgent'
+
+    manifest {
+        attributes('Premain-Class': 'org.giltene.scheduledclassloading.ScheduledClassLoadingAgent')
+    }
+}
+
+test {
+    dependsOn jar
+    
+    useJUnitPlatform()
+}
