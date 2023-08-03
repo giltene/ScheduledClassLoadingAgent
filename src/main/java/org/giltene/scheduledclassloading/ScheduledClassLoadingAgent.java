@@ -169,8 +169,8 @@ public class ScheduledClassLoadingAgent {
 
     static class AgentLoaderThread extends Thread {
         static class ClassToLoadEntry {
-            private String className;
-            private String classLoaderClassName;
+            private final String className;
+            private final String classLoaderClassName;
 
             ClassToLoadEntry(String className, String classLoaderClassName) {
                 this.className = className;
@@ -209,7 +209,7 @@ public class ScheduledClassLoadingAgent {
          * be loaded, and the second being the fully qualified name of the class of the classLoader to use in
          * loading the class.
          */
-        void parseInputFile(final String inputFileName) {
+        void parseInputFile(String inputFileName) {
             try {
                 final Scanner scanner = new Scanner(new File(inputFileName));
                 while (scanner.hasNext()) {
