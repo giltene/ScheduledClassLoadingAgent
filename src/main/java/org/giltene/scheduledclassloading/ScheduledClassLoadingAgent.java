@@ -116,15 +116,13 @@ public class ScheduledClassLoadingAgent {
     static void reportClassLoaders() {
         LOG("Class Loaders found:");
         for (ClassLoader loader : allClassLoaders.keySet()) {
-            LOG("\t Loader Class:" + loader.getClass() + " , Loader Name:" + loader.getName()
-                    + ", Loader Parent: " + loader.getParent());
+            LOG("\t Loader Class:" + loader.getClass() + ", Loader Parent: " + loader.getParent());
         }
         LOG("\t----- Of which the following are unique: ------");
         for (String loaderClassName : uniqueClassLoadersByLoaderClass.keySet()) {
             ClassLoader loader = uniqueClassLoadersByLoaderClass.get(loaderClassName);
             if (loader != null) {
-                LOG("\t Loader Class:" + loaderClassName + " , Loader Name:" + loader.getName()
-                        + ", Loader Parent: " + loader.getParent());
+                LOG("\t Loader Class:" + loaderClassName + ", Loader Parent: " + loader.getParent());
             }
         }
     }
