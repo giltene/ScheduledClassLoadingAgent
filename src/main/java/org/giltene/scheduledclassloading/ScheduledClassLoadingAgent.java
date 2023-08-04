@@ -65,40 +65,6 @@ import java.util.*;
  * The agent will follow the schedule described in the input file, loading (and initializing at load time) each
  * specified class in the order and along the timeline described.
  * <p>
- * For example, the following example input would attempt to cause three classes in a Springboot application to
- * load according to the schedule described:
- *
- * <pre>
- * <code>
- * #
- * #delay=3000
- * #
- * com.example.springbootclassesexample.ExampleClassA org.springframework.boot.loader.LaunchedURLClassLoader
- * com.example.springbootclassesexample.ExampleClassB org.springframework.boot.loader.LaunchedURLClassLoader
- * #
- * #delay=2000
- * #
- * com.example.springbootclassesexample.ExampleClassC org.springframework.boot.loader.LaunchedURLClassLoader
- * </code>
- * </pre>
- *
- *
- * Some useful diagnostics properties:
- *
- * <ul>
- * <li>
- * The agent can be set to a verbose output mode (including periodic reporting on observed class loaders) by setting the property: <br>
- * {@code -Dorg.giltene.scheduledclassloadingagent.verbose=true}
- * </li>
- * <li>
- * The frequency with which the agent reports on observed loaders can be set with the property:<br>
- * {@code -Dorg.giltene.scheduledclassloadingagent.verboseReportingPeriod=<periodInMillis>}
- * </li>
- * <li>
- * To periodically report on observed classes that include a given string, set the property:<br>
- * {@code -Dorg.giltene.scheduledclassloadingagent.reportClassNamesThatInclude=<string>}
- * </li>
- *  </ul>
  */
 
 public class ScheduledClassLoadingAgent {
@@ -196,16 +162,14 @@ public class ScheduledClassLoadingAgent {
 
         /**
          * Expected input file format:
-         * "#" will be generally ignored as a comment,, EXCEPT when "#delay=delayInMillis" is found OR
-         * a "#continueAt=millis is found.
-         * When a #delay line is enountered, the expectation is that that the agent will wait for that
-         * many millis, at that point, before acting on the rest of the input.
-         * When a #continueAt line is enountered, the expectation is that that the agent will wait for that
-         * point in time to arrive (in millis since the start of the JVM run) at that point,
-         * before acting on the rest of the input.
-         * Each non-# lines will include two strings: the first being the fully qualified class name of the class to
-         * be loaded, and the second being the fully qualified name of the class of the classLoader to use in
-         * loading the class.
+         * - "#" will be generally ignored as a comment,, EXCEPT when "#delay=delayInMillis" is found OR
+         *   a "#continueAt=millis is found.
+         * - Empty lines will be ignored.
+         * - When a #delay line is encountered, the expectation is that that the agent will wait for that
+         *   many millis, at that point, before acting on the rest of the input.
+         * - Each non-# lines will include two strings: the first being the fully qualified class name of the class to
+         *   be loaded, and the second being the fully qualified name of the class of the classLoader to use in
+         *   loading the class.
          */
         void parseInputFile(String inputFileName) {
             try {
