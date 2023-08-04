@@ -49,4 +49,4 @@ Some useful diagnostics properties:
 `-Dorg.giltene.scheduledclassloadingagent.reportClassNamesThatInclude=<string>`
 
 ----------------------------------------------------------------------------
-License: BSD 2-Clause, as described in LICENSE.txt
+License: BSD 2-Clause, as described in LICENSE file
