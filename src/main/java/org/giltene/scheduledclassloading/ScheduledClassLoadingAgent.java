@@ -76,6 +76,7 @@ public class ScheduledClassLoadingAgent {
     static final Map<ClassLoader, ClassLoader> allClassLoaders = new WeakHashMap<>();
     static final Map<String, ClassLoader> uniqueClassLoadersByLoaderClass = new WeakHashMap<>();
     static final ClassLoader NONUNIQUE_CLASSLOADER_SENTINEL = null;
+    static final ClassLoader DEFAULT_LOADER_SENTINEL = ScheduledClassLoadingAgent.class.getClassLoader();
 
     static void scanForClassLoaders(Instrumentation instrumentation) {
         synchronized (allClassLoaders) {
@@ -219,10 +220,16 @@ public class ScheduledClassLoadingAgent {
                         scanForClassLoaders(instrumentation);
                     } else if (entry instanceof ClassToLoadEntry) {
                         ClassToLoadEntry ctlEntry = (ClassToLoadEntry) entry;
-                        ClassLoader loader = uniqueClassLoadersByLoaderClass.get(ctlEntry.classLoaderClassName);
+                        ClassLoader loader = ctlEntry.classLoaderClassName.equalsIgnoreCase("default") ?
+                                DEFAULT_LOADER_SENTINEL :
+                                uniqueClassLoadersByLoaderClass.get(ctlEntry.classLoaderClassName);
                         if (loader != null) {
                             try {
-                                Class.forName(ctlEntry.className, true, loader);
+                                if (loader == DEFAULT_LOADER_SENTINEL) {
+                                    Class.forName(ctlEntry.className);
+                                } else {
+                                    Class.forName(ctlEntry.className, true, loader);
+                                }
                                 LOG("ScheduledClassLoadingAgent: loaded class " +
                                         ctlEntry.className + " using " + ctlEntry.classLoaderClassName);
                             } catch (ClassNotFoundException ex) {

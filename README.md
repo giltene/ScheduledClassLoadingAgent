@@ -15,9 +15,12 @@ The input file provided as an argument to this java agent is expected to follow 
  - When a `#delay` line is encountered, the expectation is  that the agent will wait for the specified
    number of milliseconds, before acting on the rest of the input.
     
- - Each non-empty, non-# line will include two strings: the first (className) being the fully qualified class 
-   name of the class to be loaded, and the second (classLoaderClassName) being the fully qualified name of the
+ - Each non-empty, non-# line will include exactly two strings: the first (className) being the fully qualified 
+   class name of the class to be loaded, and the second (classLoaderClassName) being the fully qualified name of the
    class of the classLoader to use in loading the class.
+
+ - The word `default` may be used as the classLoaderClassName, for example when the intent is to load JDK
+   classes.  
 
 The agent will follow the schedule described in the input file, loading (and initializing at load time) each
 specified class in the order and along the timeline described.
@@ -34,6 +37,8 @@ com.example.springbootclassesexample.ExampleClassB org.springframework.boot.load
 #
 #delay=2000
 #
+java.util.Random default
+java.util.concurrent.ConcurrentSkipListMap default
 com.example.springbootclassesexample.ExampleClassC org.springframework.boot.loader.LaunchedURLClassLoader
 ```
 
