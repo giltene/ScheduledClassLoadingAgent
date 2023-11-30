@@ -7,17 +7,17 @@
  * @version 1.0.1
  *
  * Copyright (c) 2023 Gil Tene, All rights reserved.
- *
+ * <p>
  *         Redistribution and use in source and binary forms, with or without
  *         modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  *         1. Redistributions of source code must retain the above copyright notice,
  *         this list of conditions and the following disclaimer.
- *
+ * <p>
  *         2. Redistributions in binary form must reproduce the above copyright notice,
  *         this list of conditions and the following disclaimer in the documentation
  *         and/or other materials provided with the distribution.
- *
+ * <p>
  *         THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *         AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *         IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -85,11 +85,11 @@ public class ScheduledClassLoadingAgent {
     }
     static void scanForClassLoaders(Instrumentation instrumentation) {
         synchronized (allClassLoaders) {
-            for (Class c : instrumentation.getAllLoadedClasses()) {
+            for (Class<?> c : instrumentation.getAllLoadedClasses()) {
                 ClassLoader loader = c.getClassLoader();
                 if ((loader != null) && !allClassLoaders.containsKey(loader)) {
                     allClassLoaders.put(loader, loader.getParent());
-                    Class loaderClass = loader.getClass();
+                    Class<?> loaderClass = loader.getClass();
                     String loaderClassName = loaderClass.getName();
                     String loaderCanonicalClassName = loaderClass.getCanonicalName();
                     if (!uniqueClassLoadersByLoaderClassName.containsKey(loaderClassName) &&
@@ -124,7 +124,7 @@ public class ScheduledClassLoadingAgent {
             return;
         }
         LOG("interesting classes with \"" + reportClassNamesThatInclude + "\" in their names:");
-        for (Class c : instrumentation.getAllLoadedClasses()) {
+        for (Class<?> c : instrumentation.getAllLoadedClasses()) {
             String name = c.getCanonicalName();
             if (name != null && name.contains(reportClassNamesThatInclude)) {
                 LOG("\t Class:" + c.getName() + ", " + c.getCanonicalName() +
@@ -138,8 +138,10 @@ public class ScheduledClassLoadingAgent {
                 Integer.getInteger("org.giltene.scheduledclassloadingagent.verboseReportingPeriod", 1000);
 
         final Instrumentation instrumentation;
+        final String args;
 
         VerboseReportingThread(String args, Instrumentation instrumentation) {
+            this.args = args;
             this.instrumentation = instrumentation;
         }
 
@@ -151,7 +153,7 @@ public class ScheduledClassLoadingAgent {
                 reportInterestingClasses(instrumentation);
                 try {
                     Thread.sleep(verboseReportingPeriodMillis);
-                } catch (InterruptedException ex) {
+                } catch (InterruptedException ignored) {
                 }
             }
         }
@@ -185,7 +187,7 @@ public class ScheduledClassLoadingAgent {
                 final Scanner scanner = new Scanner(new File(inputFileName));
                 while (scanner.hasNext()) {
                     String line = scanner.nextLine();
-                    if (line.length() == 0) {
+                    if (line.isEmpty()) {
                         // skip empty line
                     } else if (line.startsWith("#delay=")) {
                         String delayInMillisString = line.substring("#delay=".length());
@@ -231,15 +233,15 @@ public class ScheduledClassLoadingAgent {
                         ClassLoader loader = ctlEntry.classLoaderClassName.equalsIgnoreCase("default") ?
                                 DEFAULT_LOADER_SENTINEL :
                                 ((uniqueClassLoadersByLoaderClassName.get(ctlEntry.classLoaderClassName) == null) ?
-                                        uniqueClassLoadersByLoaderCanonicalClassName.get(ctlEntry.classLoaderClassName):
-                                        uniqueClassLoadersByLoaderClassName.get(ctlEntry.classLoaderClassName)
+                                        uniqueClassLoadersByLoaderCanonicalClassName.get(ctlEntry.getClassLoaderClassName()):
+                                        uniqueClassLoadersByLoaderClassName.get(ctlEntry.getClassLoaderClassName())
                                 );
                         if ((loader != null) && (loader != NONUNIQUE_CLASSLOADER_SENTINEL))  {
                             try {
                                 if (loader == DEFAULT_LOADER_SENTINEL) {
-                                    Class.forName(ctlEntry.className);
+                                    Class.forName(ctlEntry.getClassName());
                                 } else {
-                                    Class.forName(ctlEntry.className, true, loader);
+                                    Class.forName(ctlEntry.getClassName(), true, loader);
                                 }
                                 LOG("ScheduledClassLoadingAgent: loaded class " +
                                         ctlEntry.className + " using " + ctlEntry.classLoaderClassName);
@@ -309,7 +311,7 @@ public class ScheduledClassLoadingAgent {
         agentloaderThread.start();
         try {
             Thread.sleep(2000);
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException ignored) {
         }
     }
 }
