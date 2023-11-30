@@ -74,10 +74,15 @@ public class ScheduledClassLoadingAgent {
             System.getProperty("org.giltene.scheduledclassloadingagent.reportClassNamesThatInclude");
 
     static final Map<ClassLoader, ClassLoader> allClassLoaders = new WeakHashMap<>();
-    static final Map<String, ClassLoader> uniqueClassLoadersByLoaderClass = new WeakHashMap<>();
-    static final ClassLoader NONUNIQUE_CLASSLOADER_SENTINEL = null;
+    static final Map<String, ClassLoader> uniqueClassLoadersByLoaderClassName = new WeakHashMap<>();
+    static final Map<String, ClassLoader> uniqueClassLoadersByLoaderCanonicalClassName = new WeakHashMap<>();
+    static final ClassLoader NONUNIQUE_CLASSLOADER_SENTINEL = new SentinelClassLoader();
     static final ClassLoader DEFAULT_LOADER_SENTINEL = ScheduledClassLoadingAgent.class.getClassLoader();
 
+    static class SentinelClassLoader extends ClassLoader {
+        SentinelClassLoader() {
+        }
+    }
     static void scanForClassLoaders(Instrumentation instrumentation) {
         synchronized (allClassLoaders) {
             for (Class c : instrumentation.getAllLoadedClasses()) {
@@ -85,12 +90,15 @@ public class ScheduledClassLoadingAgent {
                 if ((loader != null) && !allClassLoaders.containsKey(loader)) {
                     allClassLoaders.put(loader, loader.getParent());
                     Class loaderClass = loader.getClass();
-                    String loaderClassName = loaderClass.getCanonicalName();
-                    if (!uniqueClassLoadersByLoaderClass.containsKey(loaderClassName)) {
-                        uniqueClassLoadersByLoaderClass.put(loaderClassName, loader);
-
+                    String loaderClassName = loaderClass.getName();
+                    String loaderCanonicalClassName = loaderClass.getCanonicalName();
+                    if (!uniqueClassLoadersByLoaderClassName.containsKey(loaderClassName) &&
+                            !uniqueClassLoadersByLoaderCanonicalClassName.containsKey(loaderCanonicalClassName)) {
+                        uniqueClassLoadersByLoaderClassName.put(loaderClassName, loader);
+                        uniqueClassLoadersByLoaderCanonicalClassName.put(loaderCanonicalClassName, loader);
                     } else {
-                        uniqueClassLoadersByLoaderClass.put(loaderClassName, NONUNIQUE_CLASSLOADER_SENTINEL);
+                        uniqueClassLoadersByLoaderClassName.put(loaderClassName, NONUNIQUE_CLASSLOADER_SENTINEL);
+                        uniqueClassLoadersByLoaderCanonicalClassName.put(loaderCanonicalClassName, NONUNIQUE_CLASSLOADER_SENTINEL);
                     }
                 }
             }
@@ -103,8 +111,8 @@ public class ScheduledClassLoadingAgent {
             LOG("\t Loader Class:" + loader.getClass() + ", Loader Parent: " + loader.getParent());
         }
         LOG("\t----- Of which the following are unique: ------");
-        for (String loaderClassName : uniqueClassLoadersByLoaderClass.keySet()) {
-            ClassLoader loader = uniqueClassLoadersByLoaderClass.get(loaderClassName);
+        for (String loaderClassName : uniqueClassLoadersByLoaderClassName.keySet()) {
+            ClassLoader loader = uniqueClassLoadersByLoaderClassName.get(loaderClassName);
             if (loader != null) {
                 LOG("\t Loader Class:" + loaderClassName + ", Loader Parent: " + loader.getParent());
             }
@@ -222,8 +230,11 @@ public class ScheduledClassLoadingAgent {
                         ClassToLoadEntry ctlEntry = (ClassToLoadEntry) entry;
                         ClassLoader loader = ctlEntry.classLoaderClassName.equalsIgnoreCase("default") ?
                                 DEFAULT_LOADER_SENTINEL :
-                                uniqueClassLoadersByLoaderClass.get(ctlEntry.classLoaderClassName);
-                        if (loader != null) {
+                                ((uniqueClassLoadersByLoaderClassName.get(ctlEntry.classLoaderClassName) == null) ?
+                                        uniqueClassLoadersByLoaderCanonicalClassName.get(ctlEntry.classLoaderClassName):
+                                        uniqueClassLoadersByLoaderClassName.get(ctlEntry.classLoaderClassName)
+                                );
+                        if ((loader != null) && (loader != NONUNIQUE_CLASSLOADER_SENTINEL))  {
                             try {
                                 if (loader == DEFAULT_LOADER_SENTINEL) {
                                     Class.forName(ctlEntry.className);
