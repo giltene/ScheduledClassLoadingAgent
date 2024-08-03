@@ -4,7 +4,7 @@ ScheduledClassLoadingAgent: A java agent that loads and initializes classes acco
 
 Expected usage:
 ```
-  java ... -javaagent=scheduledclassloadingagent.jar=<inputFile> ...
+  java ... -javaagent:scheduledclassloadingagent.jar=<inputFile> ...
 ```
 The input file provided as an argument to this java agent is expected to follow the following format:
 
